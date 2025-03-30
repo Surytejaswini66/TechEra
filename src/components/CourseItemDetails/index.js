@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '../Header';
 import './index.css';
 
 const CourseItemDetails = () => {
-  const { id } = useParams(); // Get the course ID from the URL
+  const { id } = useParams();
   const [state, setState] = useState({
     isLoading: true,
     isFailed: false,
@@ -12,11 +12,7 @@ const CourseItemDetails = () => {
     ItemDetails: {},
   });
 
-  useEffect(() => {
-    fetchCourseDetails();
-  }, []); // Fetch data on component mount
-
-  const fetchCourseDetails = async () => {
+  const fetchCourseDetails = useCallback(async () => {
     try {
       const response = await fetch(`https://apis.ccbp.in/te/courses/${id}`);
       const data = await response.json();
@@ -40,7 +36,11 @@ const CourseItemDetails = () => {
     } catch (error) {
       setState({ isLoading: false, isSuccess: false, isFailed: true });
     }
-  };
+  }, [id]); // Add `id` as a dependency
+
+  useEffect(() => {
+    fetchCourseDetails();
+  }, [fetchCourseDetails]); // Now it has no missing dependencies
 
   const { isLoading, isFailed, isSuccess, ItemDetails } = state;
   const { description, name, imageUrl } = ItemDetails;
